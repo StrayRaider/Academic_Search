@@ -1,0 +1,7 @@
+docker build -t mongo .
+
+docker images
+
+docker run mongo
+
+docker exec -it <id> /bin/bash
