@@ -5,3 +5,8 @@ docker images
 docker run mongo
 
 docker exec -it <id> /bin/bash
+
+
+docker exec -it mongo mongosh
+
+docker run --name mongo -d -p 27017:27017 mongodb/mongodb-community-server:latest
