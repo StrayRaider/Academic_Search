@@ -43,7 +43,8 @@ def show_results(request):
 
 def scrap(request):
     if 'param1' in request.GET:
-        corrected_query = TextBlob(request.GET['param1']).correct()
-        param1 = request.GET['param1']
-        scrapped_data = tasks.scrape_website(corrected_query)
-        return render(request, 'results.html', {'cards_data': scrapped_data})
+        param1_value = request.GET['param1']
+        if param1_value is not None:
+            corrected_query = TextBlob(param1_value).correct()
+            scrapped_data = tasks.scrape_website(corrected_query)
+            return render(request, 'results.html', {'cards_data': scrapped_data})
