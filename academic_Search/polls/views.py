@@ -3,6 +3,7 @@ from django.shortcuts import render
 from .models import searcheds
 from textblob import TextBlob
 from django.http import JsonResponse
+from . import tasks
 
 def index(request):
     #if request.method == 'POST':
@@ -40,6 +41,9 @@ def show_results(request):
     return render(request, 'results.html', {'cards_data': card_data_list})
     #return render(request,'results.html',{"param1": corrected_query})
 
-def animation(request):
-    scraped_data = ["data1", "data2", "data3"]
-    return JsonResponse({"data": scraped_data})
+def scrap(request):
+    if 'param1' in request.GET:
+        corrected_query = TextBlob(request.GET['param1']).correct()
+        param1 = request.GET['param1']
+        scrapped_data = tasks.scrape_website(corrected_query)
+        return render(request, 'results.html', {'cards_data': scrapped_data})

@@ -21,7 +21,7 @@
   <div class="row justify-content-center">
     <div class="col-md-6">
       <h1 class="text-center mb-4">Academic Search</h1>
-      <form id="myForm" method="post" action="{% url 'results' %}">
+      <form id="myForm" method="post" action="{% url 'scrap' %}">
         <div class="form-group">
             <label for="searchInput">Search</label>
             <input type="text" class="form-control" id="searchInput" name="query" placeholder="Enter your search term" autocomplete="off">
@@ -42,7 +42,7 @@
 <script>
   document.getElementById("myForm").addEventListener("submit", function(event) {
       var searchValue = document.getElementById("searchInput").value;
-      var actionUrl = "{% url 'results' %}?param1=" + encodeURIComponent(searchValue);
+      var actionUrl = "{% url 'scrap' %}?param1=" + encodeURIComponent(searchValue);
       document.getElementById("myForm").action = actionUrl;
   });
 </script>
