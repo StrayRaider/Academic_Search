@@ -1,14 +1,38 @@
 import time
 import re
+import os
 
 import requests
 import pymongo
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
+from urllib.parse import urlparse
+
+import pymongo
+
+client = pymongo.MongoClient("mongodb://localhost:27017/")
+db = client['publications']
+collection = db['searcheds']
         
 def readDataFromFile():
     with open("webPage.txt", "r", encoding="utf-8") as file:
         return file.read()
+
+def getData(searchingText):
+    print(searchingText)
+    try:
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.82 Safari/537.36'}
+        response = requests.get(f'https://scholar.google.com/scholar?hl=tr&as_sdt=0%2C5&q={searchingText}&btnG=',
+                headers=headers
+            )
+    except requests.exceptions.RequestException as error:
+        print(f'An error occurred: {error}')
+        return
+    status_code = response.status_code
+    print("Status code:", status_code)
+
+    if status_code == 200:
+        return response.text
 
 def parseData(data):
     try:
@@ -101,11 +125,14 @@ def find_date(row):
                     return date
 
 def find_p_type(row):
-    # publication_type
+    h3_obj = row.find('h3', class_ = "gs_rt")
     publication_type = ""
-    span_element = row.find('span', class_='gs_ct1')
-    if span_element:
-        publication_type = span_element.text.strip()
+    if h3_obj:
+        span_element = h3_obj.find('span', class_='gs_ct1')
+        if span_element:
+            publication_type = span_element.text.strip()
+        else:
+            publication_type = "[HTML][N]"
     return publication_type
 
 def find_publisher(row):
@@ -122,9 +149,9 @@ def find_keywords_article(row):
         gs_rs = gs_ri.find('div', class_='gs_rs')
         if gs_rs:
             for word in gs_rs.find_all('b'):
-                if word not in word_list:
-                    word_list.append(word)
-            return word_list
+                if word.text.strip() not in word_list:
+                    word_list.append(word.text.strip())
+    return word_list
 
 def find_url(row):
     h3_obj = row.find('h3', class_ = "gs_rt")
@@ -133,11 +160,108 @@ def find_url(row):
         url = h3_obj.find('a')["href"]
     return url
 
+def get_pdf(row):
+    pdfData = row.find('div', class_ = "gs_ggs gs_fl")
+    print("pdf data : ", pdfData,"\n")
+    if pdfData:
+        for link in pdfData.find_all('a'):
+            print("link = ", link.get('href'),"\n")
+            return link.get('href')
+
+def getSite(url):
+    try:
+        timeout_value = (2, 2)
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.82 Safari/537.36'}
+        response = requests.get(url,
+                headers=headers,timeout=timeout_value
+            )
+    except requests.exceptions.Timeout:
+        print("The request timed out.")
+        return
+    except requests.exceptions.RequestException as error:
+        print(f'An error occurred: {error}')
+        return
+    status_code = response.status_code
+    print("Status code:", status_code)
+    if status_code == 200:
+        r = response
+        soup = BeautifulSoup(r.content, 'lxml') 
+        #print(soup.prettify()) 
+        return soup
+
+def springer_find_abstract(response):
+    Abs_content = response.find('div', id="Abs1-content")
+    if Abs_content:
+        return Abs_content.text
+
+def springer_find_ref(response):
+    items_list = []
+    ol_data = response.find('ol', class_="c-article-references")
+    if ol_data:
+        list_items = ol_data.find_all('li')
+        items_list.extend([item.get_text(strip=True) for item in list_items])
+    else:
+        ul_data = response.find('ul', class_="c-article-references")
+        if ul_data:
+            list_items = ul_data.find_all('li')
+            items_list.extend([item.get_text(strip=True) for item in list_items])
+    return items_list
+
+def iEEE_find_abstract(response):
+    Abs_content = response.find('div', class_="abstract-text row g-0")
+    if Abs_content:
+        return Abs_content.text
+
+def find_abstract_ref(publisher, p_url):
+    publisher = publisher.replace(' ', '')
+    if publisher == "Springer":
+        response = getSite(p_url)
+        if response:
+            return [springer_find_abstract(response), springer_find_ref(response),find_DOI(response)]
+    elif publisher == "ieeexplore.ieee.org":
+        response = getSite(p_url)
+        if response:
+            return [iEEE_find_abstract(response), "", ""]
+    elif publisher == "nature.com":
+        response = getSite(p_url)
+        if response:
+            return [springer_find_abstract(response), springer_find_ref(response),find_DOI(response)]
+    return ["","",""]
+
+def find_DOI(response):
+    # Find all <ul> elements with class "c-bibliographic-information__list"
+    target_ul_elements = response.find('ul', class_=lambda classes: classes and 'c-bibliographic-information__list' in classes.split())
+    dois = re.search(r'https://doi\.org/\S+', target_ul_elements.text.strip()).group()
+    print("DOI Number : ", dois)
+    return dois
+
+def download_pdf(url):
+    isPdf = url.split('.')[-1]
+    name = url.split('.')[0]
+    if isPdf == 'pdf':
+        response = requests.get(url)
+        if response.status_code == 200:
+            parsed_url = urlparse(url)
+            with open(f'./pdfs/{os.path.basename(parsed_url.path)}', 'wb') as f:
+                f.write(response.content)
+    else:
+        print("it is not pdf")
+
+def find_Reference(url):
+    return ["No Reference Founded"]
+
+def writeToDb(publications):
+    collection.insert_many(publications, ordered=False, bypass_document_validation=True)
+    # Close the connection
+    client.close()
+
 def scrape_website(parameter):
     #writedataToFile()
     scrappedData = {"publications": []}
 
     data = readDataFromFile()
+    parameter = parameter.replace(' ', '+')
+    #data = getData(parameter)
 
     rows = get_rows(data)
     publications = scrappedData.get("publications", [])
@@ -160,14 +284,27 @@ def scrape_website(parameter):
         print("publisher : ", publisher)
 
         parameter_string = str(parameter)
-        print("keywords_search", parameter_string.split(' '))
-        keywords_search = parameter_string.split(' ')
+        print("keywords_search", parameter_string.split('+'))
+        keywords_search = parameter_string.split('+')
 
         keywords_article = find_keywords_article(row)
         print("keywords_article : ", keywords_article)
 
         p_url = find_url(row)
         print("find_url : ", p_url)
+
+        abstract = " Not Found ! "
+        site_data = find_abstract_ref(publisher, p_url)
+        abstract = site_data[0]
+        references = site_data[1]
+        doi_num = site_data[2]
+        #print("abstract : ",abstract)
+
+        pub_pdf = get_pdf(row)
+        print("pdf : ", pub_pdf)
+
+        #if pub_pdf:
+        #    download_pdf(pub_pdf)
 
         #citation_count
         citation_count = 0
@@ -181,19 +318,23 @@ def scrape_website(parameter):
             "publisher": publisher,
             "keywords_search": keywords_search,
             "keywords_article": keywords_article,
-            "abstract": "New Abstract of the publication.",
-            "references": ["New Reference 1", "New Reference 2"],
+            "abstract": abstract,
+            "references": references,
             "citation_count": citation_count,  # Set initial citation count to 0
-            "doi": "New DOI Number",
+            "doi": doi_num,
             "url": p_url
         }
         publications.append(new_publication)
+    writeToDb(publications)
+    return publications
 
-    # Placeholder function. Replace it with your actual web scraping code.
-    card_data_list = [
-        {'title': 'Card 1', 'description': 'This is the first card.', 'url': '/link-to-card-1/'},
-        {'title': 'Card 2', 'description': 'This is the second card.', 'url': '/link-to-card-2/'},
-        {'title': 'Card 3', 'description': 'This is the third card.', 'url': '/link-to-card-3/'},
-        # Add more cards as needed
-    ]
-    return card_data_list
+
+def get_searched():
+    cursor = collection.find({})
+    full_list = []
+    for document in cursor:
+        full_list.append(document)
+    return full_list
+
+def drop_col():
+    collection.drop()

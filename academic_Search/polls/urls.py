@@ -8,4 +8,6 @@ urlpatterns = [
     path("show/",views.get_all_searcheds,name="show"),
     path("add/",views.add_searched),
     path("scrap/",views.scrap, name="scrap"),
+    path("searcheds/",views.view_searcheds, name="searcheds"),
+    path("dropC/",views.drop_col, name="dropC"),
 ]

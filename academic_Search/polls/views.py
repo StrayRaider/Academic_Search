@@ -4,6 +4,8 @@ from .models import searcheds
 from textblob import TextBlob
 from django.http import JsonResponse
 from . import tasks
+from django.core.paginator import Paginator
+
 
 def index(request):
     #if request.method == 'POST':
@@ -45,6 +47,26 @@ def scrap(request):
     if 'param1' in request.GET:
         param1_value = request.GET['param1']
         if param1_value is not None:
+            print(param1_value)
             corrected_query = TextBlob(param1_value).correct()
             scrapped_data = tasks.scrape_website(corrected_query)
+            #tasks.get_searched()
             return render(request, 'results.html', {'cards_data': scrapped_data})
+
+def view_searcheds(request):
+    # Assuming cards_data is the list of items you want to paginate
+    cards_data_list = tasks.get_searched()
+    print(cards_data_list)
+
+    paginator = Paginator(cards_data_list, 10)  # Show 10 items per page.
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'show_searcheds.html', {'cards_data': page_obj})
+
+
+def drop_col(request):
+    tasks.drop_col()
+
+    return HttpResponse("collection dropped")

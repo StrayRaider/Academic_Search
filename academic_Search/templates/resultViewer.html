@@ -1,10 +1,136 @@
-<!-- card.html -->
-<div class="col-md-6 col-lg-4 mb-4">
+<!-- publication_card.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publication Card</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom CSS styles */
+        .card {
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: none;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+        .card-header h2 {
+            margin-bottom: 0;
+            color: #343a40;
+        }
+        .card-body {
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+        }
+        .card-text p {
+            margin-bottom: 10px;
+            color: #6c757d;
+        }
+        .card-text p strong {
+            font-weight: bold;
+            color: #343a40;
+        }
+        .badge {
+            border-radius: 20px;
+            background-color: #adb5bd;
+            color: #fff;
+            padding: 5px 10px;
+            margin-right: 5px;
+        }
+        .card-link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        /* Stylized publication details */
+        .publication-detail {
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #495057;
+        }
+        .publication-detail strong {
+            font-weight: bold;
+            color: #343a40;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
     <div class="card">
+        <div class="card-header">
+            <h2><strong>{{ card.title }}</strong></h2>
+        </div>
         <div class="card-body">
-            <h5 class="card-title">{{ card.title }}</h5>
-            <p class="card-text">{{ card.description }}</p>
-            <a href="{{ card.url }}" class="btn btn-primary">Read More</a>
+            <div class="card-text">
+                <p class="publication-detail"><strong>Publication Type:</strong> {{ card.publication_type }}</p>
+                <p class="publication-detail"><strong>Publication Date:</strong> {{ card.publication_date }}</p>
+                <p class="publication-detail"><strong>Publisher:</strong> {{ card.publisher }}</p>
+                <p><strong>Authors:</strong><br>
+                    {% for author in card.authors %}
+                        <span class="badge">{{ author }}</span>
+                    {% endfor %}
+                </p>
+                <p><strong>Keywords (Search):</strong><br>
+                    {% for keyword in card.keywords_search %}
+                        <span class="badge">{{ keyword }}</span>
+                    {% endfor %}
+                </p>
+                <p><strong>Keywords (Article):</strong><br>
+                    {% for keyword in card.keywords_article %}
+                        <span class="badge">{{ keyword }}</span>
+                    {% endfor %}
+                </p>
+                <p><strong>Abstract:</strong> {{ card.abstract }}</p>
+                <p><strong>References:</strong><br>
+                    {% for reference in card.references %}
+                        - {{ reference }}<br>
+                    {% endfor %}
+                </p>
+                <p><strong>Citation Count:</strong> {{ card.citation_count }}</p>
+                <p><strong>DOI:</strong> <a href="{{ card.doi }}" class="card-link">{{ card.doi }}</a></p>
+                <p><strong>URL:</strong> <a href="{{ card.url }}" class="card-link">{{ card.url }}</a></p>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Bootstrap JS and jQuery (optional, but required for Bootstrap JS components) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>
+
+
+
+
+
+<!-- 
+new_publication = {
+    "title": title,
+    "authors": authors,
+    "publication_type": publication_type,
+    "publication_date": date,
+    "publisher": publisher,
+    "keywords_search": keywords_search,
+    "keywords_article": keywords_article,
+    "abstract": "New Abstract of the publication.",
+    "references": ["New Reference 1", "New Reference 2"],
+    "citation_count": citation_count,  # Set initial citation count to 0
+    "doi": "New DOI Number",
+    "url": p_url
+}
+    
+ -->
