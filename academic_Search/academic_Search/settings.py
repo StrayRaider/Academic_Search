@@ -124,3 +124,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+ELASTICSEARCH_HOST = 'localhost'  # Elasticsearch server host
+ELASTICSEARCH_PORT = 9200  # Elasticsearch server port

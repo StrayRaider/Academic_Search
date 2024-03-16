@@ -252,16 +252,23 @@ def find_Reference(url):
 
 def writeToDb(publications):
     collection.insert_many(publications, ordered=False, bypass_document_validation=True)
-    # Close the connection
-    client.close()
+
+def findDoiFromUrl(url):
+    # DOI'yi çıkarmak için regex deseni
+    doi_pattern = r'\/(?P<doi>10\.\d{4,}\/[\w\.\-\/]+)'
+    match = re.search(doi_pattern, url)
+    if match:
+        return match.group('doi')
+    else:
+        return None
 
 def scrape_website(parameter):
     #writedataToFile()
     scrappedData = {"publications": []}
 
-    data = readDataFromFile()
+    #data = readDataFromFile()
     parameter = parameter.replace(' ', '+')
-    #data = getData(parameter)
+    data = getData(parameter)
 
     rows = get_rows(data)
     publications = scrappedData.get("publications", [])
@@ -300,6 +307,9 @@ def scrape_website(parameter):
         doi_num = site_data[2]
         #print("abstract : ",abstract)
 
+        if doi_num == "":
+            doi_num = findDoiFromUrl(p_url)
+
         pub_pdf = get_pdf(row)
         print("pdf : ", pub_pdf)
 
@@ -334,6 +344,14 @@ def get_searched():
     full_list = []
     for document in cursor:
         full_list.append(document)
+    return full_list
+
+def get_searched_by_url(url_to_match):
+    cursor = collection.find({"url": url_to_match})
+    full_list = []
+    for document in cursor:
+        full_list.append(document)
+    print(full_list)
     return full_list
 
 def drop_col():

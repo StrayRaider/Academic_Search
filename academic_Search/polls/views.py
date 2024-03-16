@@ -70,3 +70,14 @@ def drop_col(request):
     tasks.drop_col()
 
     return HttpResponse("collection dropped")
+
+def showCard(request):
+    card = request.GET.get('card', '')  # Get the parameter value from the request
+    return render(request, 'resultViewer.html', {'card': card})
+
+def card_details(request, card_variable):
+    # Fetch the card object based on the provided card_id
+    print("card_variable : ", card_variable)
+    cards_data = tasks.get_searched_by_url(card_variable)
+
+    return render(request, 'resultViewer.html', {'card': cards_data[0]})

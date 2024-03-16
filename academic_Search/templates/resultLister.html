@@ -1,0 +1,90 @@
+<!-- publication_card.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publication Card</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom CSS styles */
+        .card {
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: none;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+        .card-header h2 {
+            margin-bottom: 0;
+            color: #343a40;
+        }
+        .card-body {
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+        }
+        .card-text p {
+            margin-bottom: 10px;
+            color: #6c757d;
+        }
+        .card-text p strong {
+            font-weight: bold;
+            color: #343a40;
+        }
+        .badge {
+            border-radius: 20px;
+            background-color: #adb5bd;
+            color: #fff;
+            padding: 5px 10px;
+            margin-right: 5px;
+        }
+        .card-link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        /* Stylized publication details */
+        .publication-detail {
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #495057;
+        }
+        .publication-detail strong {
+            font-weight: bold;
+            color: #343a40;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h4><strong>{{ card.title }}</strong></h4>
+            <a href="{% url 'card_details' card.url %}"><button>View Full Card</button></a>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS and jQuery (optional, but required for Bootstrap JS components) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    // Alternatively, you can use JavaScript to submit the form when the button is clicked
+    document.getElementById('htmlForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent the default form submission
+        this.submit(); // Submit the form
+    });
+</script>
+</body>
+</html>
