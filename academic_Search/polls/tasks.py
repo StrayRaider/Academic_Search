@@ -11,9 +11,30 @@ from urllib.parse import urlparse
 import pymongo
 from elasticsearch import Elasticsearch
 
+def check_elasticsearch_connection(url):
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            # Elasticsearch is connected and healthy
+            print("Elasticsearch is connected and healthy.")
+            return True
+        else:
+            # Elasticsearch responded with an error
+            print("Elasticsearch responded with an error:", response.status_code)
+            return False
+    except requests.exceptions.RequestException as e:
+        # Connection error occurred
+        print("Error connecting to Elasticsearch:", e)
+        return False
+
 es = Elasticsearch(
-    "https://localhost:9200"
+    "http://localhost:9200"
 )
+es_url = "http://localhost:9200"
+
+# Check Elasticsearch connection
+is_connected = check_elasticsearch_connection(es_url)
+print("Is Elasticsearch connected:", is_connected)
 
 client = pymongo.MongoClient("mongodb://localhost:27017/")
 db = client['publications']
@@ -283,9 +304,9 @@ def scrape_website(parameter):
     #writedataToFile()
     scrappedData = {"publications": []}
 
-    data = readDataFromFile()
+    #data = readDataFromFile()
     parameter = parameter.replace(' ', '+')
-    #data = getData(parameter)
+    data = getData(parameter)
 
     rows = get_rows(data)
     publications = scrappedData.get("publications", [])
@@ -381,3 +402,43 @@ def get_searched_by_url(url_to_match):
 
 def drop_col():
     collection.drop()
+
+
+# Define a function to index documents into Elasticsearch
+def index_documents(index_name, documents):
+    # Connect to Elasticsearch
+
+    # Iterate over each document and index it
+    for doc_id, doc in enumerate(documents, start=1):
+        # Index the document
+        doc['_id'] = str(doc['_id'])
+        
+        # Convert non-ASCII characters to ASCII or Unicode
+        doc['publication_type'] = doc['publication_type'].encode('ascii', 'ignore').decode('utf-8')
+        
+        # Index the document
+        print("Document to be indexed:")
+        print("Document to be indexed:")
+        print(doc)
+        es.index(index=index_name, body=doc, id=doc_id)
+
+# Define a function to perform a filtered search
+def filtered_search(index_name, field, value):
+    # Connect to Elasticsearch
+
+    # Define the search query with a filter
+    search_query = {
+        "query": {
+            "match": {
+                field: value  # Match documents where the specified field matches the given value
+            }
+        }
+    }
+
+    # Execute the search query
+    search_results = es.search(index=index_name, body=search_query)
+
+    # Extract the matching documents
+    matching_documents = [hit["_source"] for hit in search_results["hits"]["hits"]]
+
+    return matching_documents

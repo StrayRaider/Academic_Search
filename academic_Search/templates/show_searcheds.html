@@ -61,7 +61,8 @@
       const sortOrder = document.querySelector('input[name="sort_radio"]:checked').value;
   
       // Redirect to the view with selected sorting order
-      window.location.href = "{% url 'searcheds' %}?page=1&sort=" + sortOrder;
+      var number = "{{ cards_data.number }}";
+      window.location.href = "{% url 'searcheds' %}?page="+ number +"&sort=" + sortOrder;
     });
   </script>
   

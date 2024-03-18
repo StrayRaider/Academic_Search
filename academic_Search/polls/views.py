@@ -134,3 +134,12 @@ def filter_publications(request):
 
     # Pass filtered results to template for rendering
     return render(request, 'filtered_publications.html', {'filtered_results': filtered_results})
+
+def correct_text_ajax(request):
+    if request.method == 'GET':
+        input_text = request.GET.get('input_text', '')
+        corrected_text = str(TextBlob(input_text).correct())
+        if corrected_text != input_text:
+            return JsonResponse({'corrected_text': corrected_text})
+        else:
+            return JsonResponse({'corrected_text': ""})

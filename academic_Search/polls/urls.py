@@ -12,4 +12,5 @@ urlpatterns = [
     path("dropC/",views.drop_col, name="dropC"),
     path('card_details/<path:card_variable>/', views.card_details, name='card_details'),
     path('filter/', views.filter_publications, name='filter_publications'),
+    path('correct_text_ajax/', views.correct_text_ajax, name='correct_text_ajax'),
 ]
