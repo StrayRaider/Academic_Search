@@ -100,6 +100,7 @@
                 <p><strong>Citation Count:</strong> {{ card.citation_count }}</p>
                 <p><strong>DOI:</strong> <a href="{{ card.doi }}" class="card-link">{{ card.doi }}</a></p>
                 <p><strong>URL:</strong> <a href="{{ card.url }}" class="card-link">{{ card.url }}</a></p>
+                <button class="btn btn-primary btn-block" type="button" id="pdfbutton">PDF</button>
             </div>
         </div>
     </div>
@@ -109,6 +110,23 @@
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    // Assigning Django variables to JavaScript variables
+    var pubPdfUrl = "{{ card.pub_pdf }}";
+    var doiUrl = "{{ card.doi }}";
+
+    document.getElementById("pdfbutton").addEventListener("click", function () {
+        var cvWindow = window.open();
+      
+        const pdfFrame = document.createElement("iframe");
+        pdfFrame.src = pubPdfUrl;
+        pdfFrame.style = "width: 100%; height: 100%";
+      
+        cvWindow.document.body.appendChild(pdfFrame);
+    });
+</script>
+
+
 
 </body>
 </html>

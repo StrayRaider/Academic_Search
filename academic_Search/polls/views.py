@@ -54,13 +54,46 @@ def scrap(request):
             return render(request, 'results.html', {'cards_data': scrapped_data})
 
 def view_searcheds(request):
-    # Assuming cards_data is the list of items you want to paginate
-    cards_data_list = tasks.get_searched()
-    print(cards_data_list)
 
-    paginator = Paginator(cards_data_list, 10)  # Show 10 items per page.
+    sort_param = request.GET.get('sort', None)
 
-    page_number = request.GET.get('page')
+    # Your sorting logic based on the parameter
+    if sort_param == 'asc':
+        # Handle ascending sorting
+        sorted_documents = tasks.get_searched_sorted('publication_date', 1)
+        paginator = Paginator(sorted_documents, 10)  # Show 10 items per page.
+
+        page_number = request.GET.get('page')
+
+    elif sort_param == 'desc':
+        # Handle descending sorting
+        sorted_documents = tasks.get_searched_sorted('publication_date', -1)
+
+        paginator = Paginator(sorted_documents, 10)  # Show 10 items per page.
+
+        page_number = request.GET.get('page')
+    elif sort_param == 'Casc':
+        # Handle ascending sorting
+        sorted_documents = tasks.get_searched_sorted('citation_count', 1)
+        paginator = Paginator(sorted_documents, 10)  # Show 10 items per page.
+
+        page_number = request.GET.get('page')
+
+    elif sort_param == 'Cdesc':
+        # Handle descending sorting
+        sorted_documents = tasks.get_searched_sorted('citation_count', -1)
+
+        paginator = Paginator(sorted_documents, 10)  # Show 10 items per page.
+
+        page_number = request.GET.get('page')
+    else:
+        # Assuming cards_data is the list of items you want to paginate
+        cards_data_list = tasks.get_searched()
+        print(cards_data_list)
+
+        paginator = Paginator(cards_data_list, 10)  # Show 10 items per page.
+
+        page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     return render(request, 'show_searcheds.html', {'cards_data': page_obj})
@@ -81,3 +114,23 @@ def card_details(request, card_variable):
     cards_data = tasks.get_searched_by_url(card_variable)
 
     return render(request, 'resultViewer.html', {'card': cards_data[0]})
+
+
+
+def filter_publications(request):
+    # Get filter parameters from request
+    filters = request.GET.getlist('filter')
+
+    # Build Elasticsearch query
+    es_query = Search(index='publications_index')
+    for f in filters:
+        es_query = es_query.query('match', **{f: request.GET[f]})
+
+    # Execute the Elasticsearch query
+    response = es_query.execute()
+
+    # Extract filtered results
+    filtered_results = [hit.to_dict() for hit in response.hits]
+
+    # Pass filtered results to template for rendering
+    return render(request, 'filtered_publications.html', {'filtered_results': filtered_results})

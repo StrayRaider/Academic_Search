@@ -69,8 +69,9 @@
 <div class="container">
     <div class="card">
         <div class="card-header">
-            <h4><strong>{{ card.title }}</strong></h4>
-            <a href="{% url 'card_details' card.url %}"><button>View Full Card</button></a>
+            <h4><strong><center>{{ card.title }}
+              </center></strong></h4>
+            <a href="{% url 'card_details' card.url %}"><button class="btn btn-primary btn-block" >View Full Card</button></a>
         </div>
     </div>
 </div>

@@ -11,14 +11,60 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
 </head>
 <body>
+
+    <!-- List Section -->
+    <div class="col-md-9">
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="sort_radio" id="sort_asc" value="asc" checked>
+        <label class="form-check-label" for="sort_asc">
+          Oldest First
+        </label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="sort_radio" id="sort_desc" value="desc">
+        <label class="form-check-label" for="sort_desc">
+          Newest First
+        </label>
+      </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="sort_radio" id="sort_Casc" value="Casc">
+          <label class="form-check-label" for="sort_Casc">
+            Citation Lesser
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="sort_radio" id="sort_Cdesc" value="Cdesc">
+          <label class="form-check-label" for="sort_Cdesc">
+            Citation Greater
+          </label>
+        </div>
+      <button id="sort_button" class="btn btn-primary mt-3">Sort</button>
+    </div>
+
   {% for card in cards_data %}
-    {% include 'resultLister.html' with card=card %}
+  {% include 'resultLister.html' with card=card %}
   {% endfor %}  
+
+
+  {% include '_pagination.html' with page_obj=cards_data%}
   <!-- Bootstrap JS and dependencies -->
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    // Get the sort button element
+    const sortButton = document.getElementById('sort_button');
+  
+    // Listen for click event on the sort button
+    sortButton.addEventListener('click', function() {
+      // Get the selected sorting order
+      const sortOrder = document.querySelector('input[name="sort_radio"]:checked').value;
+  
+      // Redirect to the view with selected sorting order
+      window.location.href = "{% url 'searcheds' %}?page=1&sort=" + sortOrder;
+    });
+  </script>
+  
+</script>
 </body>
 </html>
-
-{% include '_pagination.html' with page_obj=cards_data%}

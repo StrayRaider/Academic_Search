@@ -11,4 +11,5 @@ urlpatterns = [
     path("searcheds/",views.view_searcheds, name="searcheds"),
     path("dropC/",views.drop_col, name="dropC"),
     path('card_details/<path:card_variable>/', views.card_details, name='card_details'),
+    path('filter/', views.filter_publications, name='filter_publications'),
 ]

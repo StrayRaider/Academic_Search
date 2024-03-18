@@ -9,6 +9,11 @@ from fake_useragent import UserAgent
 from urllib.parse import urlparse
 
 import pymongo
+from elasticsearch import Elasticsearch
+
+es = Elasticsearch(
+    "https://localhost:9200"
+)
 
 client = pymongo.MongoClient("mongodb://localhost:27017/")
 db = client['publications']
@@ -251,7 +256,19 @@ def find_Reference(url):
     return ["No Reference Founded"]
 
 def writeToDb(publications):
-    collection.insert_many(publications, ordered=False, bypass_document_validation=True)
+    for publication in publications:
+        url_to_check = publication.get("url")
+        if url_to_check:
+            existing_document = collection.find_one({"url": url_to_check})
+            if existing_document:
+                print(f"Document with URL '{url_to_check}' already exists. Skipping insertion.")
+            else:
+                # If the document with the URL doesn't exist, insert it
+                collection.insert_one(publication)
+                print(f"Inserted document with URL '{url_to_check}'.")
+        else:
+            print("URL not found in publication data. Skipping insertion.")
+
 
 def findDoiFromUrl(url):
     # DOI'yi çıkarmak için regex deseni
@@ -266,9 +283,9 @@ def scrape_website(parameter):
     #writedataToFile()
     scrappedData = {"publications": []}
 
-    #data = readDataFromFile()
+    data = readDataFromFile()
     parameter = parameter.replace(' ', '+')
-    data = getData(parameter)
+    #data = getData(parameter)
 
     rows = get_rows(data)
     publications = scrappedData.get("publications", [])
@@ -332,7 +349,8 @@ def scrape_website(parameter):
             "references": references,
             "citation_count": citation_count,  # Set initial citation count to 0
             "doi": doi_num,
-            "url": p_url
+            "url": p_url,
+            "pub_pdf":pub_pdf
         }
         publications.append(new_publication)
     writeToDb(publications)
@@ -341,6 +359,13 @@ def scrape_website(parameter):
 
 def get_searched():
     cursor = collection.find({})
+    full_list = []
+    for document in cursor:
+        full_list.append(document)
+    return full_list
+
+def get_searched_sorted(key, direction):
+    cursor = collection.find({}).sort(key, direction)
     full_list = []
     for document in cursor:
         full_list.append(document)
