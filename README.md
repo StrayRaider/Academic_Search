@@ -19,9 +19,8 @@ The Academic Search project aims to provide researchers and students with a conv
 
 To set up the Academic Search project on your local machine, follow these steps:
 
-1. Clone the repository: `git clone https://github.com/yourusername/academic-search.git`
+1. Clone the repository: `git clone https://github.com/StrayRaider/Academic_Search.git`
 2. Install the required Python libraries: `pip install -r requirements.txt`
-3. Configure the MongoDB connection settings in the `config.py` file.
 
 ## Usage
 
